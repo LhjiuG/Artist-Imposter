@@ -71,6 +71,20 @@ def total_variation_loss(image):
     x_deltas, y_deltas = high_pass_x_y(image)
     return tf.reduce_sum(tf.abs(x_deltas)) + tf.reduce_sum(tf.abs(y_deltas))
 
+@tf.function
+def generate_noise_image(content_image):
+    """
+    Generates a noisy image by adding random noise to the content_image
+    """
+    print(content_image.shape)
+    # Generate a random noise_image
+    noise_image = np.random.uniform(-20, 20,(content_image.shape)).astype('float32')
+
+    # Set the input_image to be a weighted average of the content_image and a noise_image
+    input_image = noise_image * 0.6 + content_image * (1 - 0.6)
+
+    return input_image
+
 
 def vgg_layers(layer_names):
     """ Creates a vgg model that returns a list of intermediate output values."""
@@ -111,8 +125,8 @@ class StyleContentLoss(tf.keras.losses.Loss):
 
     def __init__(self, style_layers, content_layers, style_image, content_image):
         super(StyleContentLoss, self).__init__()
-        self.style_weight = 1e-2
-        self.content_weight = 1e4
+        self.style_weight = 1e-1
+        self.content_weight = 1e3
         extractor = StyleContentModel(style_layers, content_layers)
         self.style_targets = extractor(style_image)['style']
         self.content_targets = extractor(content_image)['content']
@@ -120,7 +134,7 @@ class StyleContentLoss(tf.keras.losses.Loss):
         self.num_style_layers = len(style_layers)
 
     def call(self, y_true, y_pred):
-        style_outputs = y_true  #
+        style_outputs = y_true  
         content_outputs = y_pred
         style_loss = tf.add_n([tf.reduce_mean((style_outputs[name] - self.style_targets[name]) ** 2)
                                for name in style_outputs.keys()])
@@ -136,8 +150,8 @@ class CONFIG:
     NOISE_RATIO = 0.6
     EPOCHS = 10
     STEPS_PER_EPOCH = 100
-    STYLE_IMAGE = '/content/983794168.jpg'  # Style image to use.
-    CONTENT_IMAGE = '/content/background-image.png'  # Content image to use.
+    STYLE_IMAGE = '/content/983794168.jpg' # Style image to use.
+    CONTENT_IMAGE = '/content/BGBBZIZKAJBYVNDYACFG5LGFDE.jfif'  # Content image to use.
     OUTPUT_DIR = 'output/'
     CONTENT_LAYER = ['block5_conv2']
     STYLE_LAYERS = ['block1_conv1',
@@ -151,10 +165,11 @@ class CONFIG:
 style_image = load_img(CONFIG.STYLE_IMAGE)
 content_image = load_img(CONFIG.CONTENT_IMAGE)
 image = tf.Variable(content_image)
+noised_image = generate_noise_image(content_image)
 
 model = StyleContentModel(CONFIG.STYLE_LAYERS, CONFIG.CONTENT_LAYER)
 loss = StyleContentLoss(CONFIG.STYLE_LAYERS, CONFIG.CONTENT_LAYER, style_image, content_image)
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.05, beta_1=0.99, epsilon=1e-5)
 
 
 @tf.function()
