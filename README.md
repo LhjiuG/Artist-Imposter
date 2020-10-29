@@ -14,3 +14,4 @@ What I would like to do:
 What I have to fix:
 1. Decrease the amount of artifact in the generated image.
 
+awdd
