@@ -1,4 +1,4 @@
-# Artist-Imposter
+# Neural-Style-Transfer
 Simple neural style transfer model based on VGG19
 
 The NST is an algorithm that try to manipulate a "*Content*" image to look more
