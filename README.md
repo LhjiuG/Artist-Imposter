@@ -19,7 +19,7 @@ Most of the problems I encountered were not really problems, but more dissatisfa
 
 ## Results
 Here you can see a mix between a paint and an image containing the Canadian interceptor jet Avro Arrow.
-![alt text](Artist-Imposter\ade.png=true)
+![alt text](https://github.com/LhjiuG/Artist-Imposter/blob/main/ade.png?raw=true)
 
 
 
